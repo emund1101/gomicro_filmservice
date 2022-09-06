@@ -1,0 +1,34 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "./proto;order";
+
+service OrderService {
+  //rpc方法
+  rpc Buy(BuyRequest) returns (Respone) {}//预订购买,锁住座位
+  rpc Pay(PayRequest) returns (Respone) {} //支付
+  rpc Refund(PayRequest) returns (Respone){}//退款
+  rpc GetInfo(InfoRequest) returns (Respone){} //查看详情
+}
+
+message BuyRequest{
+//    用户id,场次, 座位号数组
+  int64 userid=1;
+  int64 film_sid=2;
+  string seats=3; //座位号ids 1,2,3
+}
+
+message PayRequest{
+  int64 oid=1;
+  string auth =2;//登录验证码
+}
+
+message InfoRequest{
+  int64 id=1;
+  string auth =2;//登录验证码
+}
+
+
+message Respone{
+  bytes respone=1;
+}

@@ -1,0 +1,56 @@
+hosts:
+  database_user:
+    type: mysql
+    address:  172.16.100.186
+    user: admin
+    password: admin123
+    dbname: microservice
+    port: 3306
+  database_order:
+    type: mysql
+    address:  172.16.100.186
+    user: admin
+    password: admin123
+    dbname: micro_order
+    port: 3306
+  database_films:
+    type: mysql
+    address:  172.16.100.186
+    user: admin
+    password: admin123
+    dbname: micro_film
+    port: 3306
+  redis:
+    address: 127.0.0.1
+    port: 6379
+    password:
+    db: 0
+  registry-consul:
+    address: 127.0.0.1:8500
+  reporter:
+    address: 127.0.0.1:11800
+
+services:  #服务
+  service_order:
+    name: order
+    version: 1.0
+  service_user:
+    name: user
+    version: 1.0
+  service_film:
+    name: film
+    version: 1.0
+
+routers:    #网关注册路由
+  post: #post 请求
+    - /user/Login     #登录
+    - /user/Register #注册
+    - /user/Authorize  #快速验证登录码
+    - /order/Buy  #下单预订
+    - /order/Pay  #付款
+    - /order/Refund #退款
+    - /order/GetInfo #获取订单信息
+    - /film/GetAllList
+    - /film/GetInfoList
+    - /film/GetHallInfo
+  get: #get请求

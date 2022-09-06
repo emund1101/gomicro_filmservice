@@ -1,0 +1,33 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "./proto;user";
+
+service UserService {
+  rpc Register(RegisterRequest) returns (Respone) {}//注册
+  rpc Login(LoginRequest) returns (Respone){}//登录
+  rpc Authorize(AuthRequest) returns (Respone){} //登录根据授权码获取登录数据
+}
+
+message RegisterRequest{
+  string mobile=1;
+  string name=2;
+  string avadar=3;
+  string birthday = 4;
+  string password =5;
+}
+
+message LoginRequest{
+  string mobile=1;
+  int64 type=2; //登录方式 ,1 手机验证码 ，2密码
+  string code=3;//验证码
+  string password=4;//密码
+}
+
+message AuthRequest{
+  string auth=1;
+}
+
+message Respone{
+  bytes respone=1; //json 格式，输出字节码
+}

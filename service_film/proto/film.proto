@@ -1,0 +1,27 @@
+syntax = "proto3";
+
+package proto;
+option go_package = "./proto;film";
+
+service FilmService {
+  rpc GetAllList(FilmListRequest) returns (Respone){}//获取所有数据
+  rpc GetInfoList(FilmListRequest) returns (Respone){} //获取参数下该电影等的数据场次信息
+  rpc GetHallInfo(FilmInfoRequest) returns (Respone){} //获取该场次座位信息
+}
+
+message FilmListRequest {
+  string time =1;//时间
+  string cinema =2;//电影院
+  string name = 3;//片名
+  string area =4; //地区
+  string auth =5;//登录验证码
+}
+
+message FilmInfoRequest {
+  int64 film_sid=1; //电影场次id
+  string auth =2;//登录验证码
+}
+
+message Respone{
+  bytes respone=1;
+}
