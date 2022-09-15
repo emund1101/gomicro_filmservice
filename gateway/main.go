@@ -77,6 +77,7 @@ func fasthttpdeal(ctx *fasthttp.RequestCtx) {
 	var rsp map[string][]byte
 	var req map[string]interface{}
 	path := string(ctx.Path())
+	method := string(ctx.Method())
 
 	url := lo.Substring(path, 1, uint(len(path)-1))
 	path_slice := strings.Split(url, "/")
@@ -96,7 +97,7 @@ func fasthttpdeal(ctx *fasthttp.RequestCtx) {
 
 	request := cl.NewRequest(path_slice[0], string(a)+"Service."+path_slice[1], req, client.WithContentType("application/json"))
 	//注入链路context
-	plugin_micro.NewGateCall(utils.GetTracer(), context_bg, request, path)
+	plugin_micro.NewGateCall(utils.GetTracer(), context_bg, request, path,method)
 	nctx := utils.GetContext()
 
 	if err := cl.Call(nctx, request, &rsp); err == nil {

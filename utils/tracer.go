@@ -10,7 +10,6 @@ import (
 
 var tracer *go2sky.Tracer
 var ctx context.Context
-var spanname string
 
 func StartTracer(serviceAddr, serviceName string) go2sky.Reporter {
 	re, err := reporter.NewGRPCReporter(serviceAddr)
@@ -36,14 +35,6 @@ func GetContext() context.Context {
 	return ctx
 }
 
-func SetTContext(ctx2 context.Context) {
+func SetContext(ctx2 context.Context) {
 	ctx = ctx2
-}
-
-func GetSpanName() string {
-    return spanname
-}
-
-func SetSpanName(name string){
-    spanname = name
 }
