@@ -50,16 +50,16 @@ func main() {
 	srv.Init(
 		micro.WrapHandler(
 			//wservice.NewHandlerWrapper(srv),
-			plugin_micro.NewHandlerWrapper(utils.GetTracer(), conf.Get("services", "service_user", "name").String("")),
+			plugin_micro.NewHandlerWrapper(utils.GetTracer(), conf.Get("services", "service_film ", "name").String("")),
 		), //将服务上下文传入到处理器使用.
-	//	micro.WrapClient(plugin_micro.NewClientWrapper(utils.GetTracer(), plugin_micro.WithClientWrapperReportTags(conf.Get("services", "service_user", "name").String("")))),
+		micro.WrapClient(plugin_micro.NewClientWrapper(utils.GetTracer(), plugin_micro.WithClientWrapperReportTags(conf.Get("services", "service_film", "name").String("")))),
 	)
 
 	// Register handler  注册rpc的服务
 	filmsrv := new(handler.FilmService)
 	filmsrv.Db = db
 	filmsrv.Rdb = rdb
-	filmsrv.GRPClient = cl
+	filmsrv.GRPClient = srv.Client() //因为添加了拦截call记录tracing
 
 	pb.RegisterFilmServiceHandler(srv.Server(), filmsrv)
 	// 运行服务

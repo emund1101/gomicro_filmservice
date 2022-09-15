@@ -4,7 +4,6 @@ import (
 	"context"
 	pb "films/service_film/proto"
 	"films/utils"
-	plugin_micro "films/utils/go2sky_micro"
 	"github.com/go-redis/redis/v8"
 	jsoniter "github.com/json-iterator/go"
 	"go-micro.dev/v4/client"
@@ -126,9 +125,11 @@ func (e *FilmService) getAuth(auth string) bool {
 
 	ctx := utils.GetContext()
 	//注入链路context
-	plugin_micro.NewCall(utils.GetTracer(), ctx, greq)
-	nctx := utils.GetContext()
-	if err := e.GRPClient.Call(nctx, greq, &rsp); err == nil {
+	//	plugin_micro.NewCall(utils.GetTracer(), ctx, greq)
+	//	nctx := utils.GetContext()
+	//	if err := e.GRPClient.Call(nctx, greq, &rsp); err == nil {
+	
+	if err := e.GRPClient.Call(ctx, greq, &rsp); err == nil {
 		rst := utils.Json_return{}
 		jsoniter.Unmarshal(rsp["respone"], &rst)
 		if rst.Code == 1 {
@@ -136,5 +137,13 @@ func (e *FilmService) getAuth(auth string) bool {
 		}
 
 	}
+	
+// 	e.GRPClient.Call(ctx, greq, &rsp)
+// 	rst := utils.Json_return{}
+// 	jsoniter.Unmarshal(rsp["respone"], &rst)
+// 	if rst.Code == 1 {
+// 		return true
+// 	}
+
 	return false
 }

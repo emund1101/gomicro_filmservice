@@ -4,6 +4,7 @@ import (
 	"films/service_order/handler"
 	pb "films/service_order/proto"
 	"films/utils"
+	plugin_micro "films/utils/go2sky_micro"
 	"films/utils/orm"
 	"fmt"
 	"github.com/asim/go-micro/plugins/registry/consul/v4"
@@ -38,7 +39,9 @@ func main() {
 		micro.Version(conf.Get("services", "service_order", "version").String("")),
 		micro.Registry(reg),
 	)
-	srv.Init()
+	srv.Init(
+		micro.WrapHandler(plugin_micro.NewHandlerWrapper(utils.GetTracer(), conf.Get("services", "service_order", "name").String(""))),
+	)
 
 	odersrv := new(handler.OrderService)
 	odersrv.Db = db

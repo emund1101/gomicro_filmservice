@@ -5,15 +5,15 @@ import (
 	"errors"
 	"films/utils"
 	"fmt"
-	"strings"
-	"time"
-
 	"github.com/SkyAPM/go2sky"
+	jsoniter "github.com/json-iterator/go"
 	"go-micro.dev/v4/client"
 	"go-micro.dev/v4/metadata"
 	"go-micro.dev/v4/registry"
 	"go-micro.dev/v4/server"
 	agentv3 "skywalking.apache.org/repo/goapi/collect/language/agent/v3"
+	"strings"
+	"time"
 )
 
 const (
@@ -59,6 +59,11 @@ func (s *clientWrapper) Call(ctx context.Context, req client.Request, rsp interf
 	span.SetSpanLayer(agentv3.SpanLayer_RPCFramework)
 
 	defer span.End()
+
+	msg, _ := jsoniter.Marshal(req.Body())
+	span.Tag("请求内容", string(msg))
+	span.Tag("请求类型", req.ContentType())
+
 	for _, k := range s.reportTags {
 		if v, ok := metadata.Get(ctx, k); ok {
 			span.Tag(go2sky.Tag(k), v)
@@ -150,7 +155,7 @@ func NewCallWrapper(sw *go2sky.Tracer, reportTags ...string) client.CallWrapper 
 			if sw == nil {
 				return errTracerIsNil
 			}
-            
+
 			name := fmt.Sprintf("%s.%s", req.Service(), req.Endpoint())
 			span, err := sw.CreateExitSpan(ctx, name, req.Service(), func(key, value string) error {
 				mda, _ := metadata.FromContext(ctx)
@@ -246,28 +251,33 @@ func NewHandlerWrapper(sw *go2sky.Tracer, reportTags ...string) server.HandlerWr
 				}
 			}
 			utils.SetTContext(ctx)
+			utils.SetSpanName(name)
 			if err = fn(ctx, req, rsp); err != nil {
 				span.Error(time.Now(), err.Error())
 			}
+			//记录数据
+				 
+			span.Tag("响应内容", fmt.Sprintf("%s",rsp))
+
 			return err
 		}
 	}
 }
 
-func NewGateCall(sw *go2sky.Tracer, ctx context.Context, req client.Request) error {
-	span, ctx, err := sw.CreateEntrySpan(ctx, "gateway/fasthttpdeal", func(key string) (string, error) {
-		str, _ := metadata.Get(ctx, strings.Title(key))
-		return str, nil
-	})
-	if err != nil {
-		return err
-	}
-	span.SetComponent(componentIDGOHttpClient)
-	span.SetSpanLayer(agentv3.SpanLayer_RPCFramework)
-	defer span.End()
+func NewGateCall(sw *go2sky.Tracer, ctx context.Context, req client.Request, path string) error {
+	//	span, ctx, err := sw.CreateEntrySpan(ctx, path, func(key string) (string, error) {
+	//		str, _ := metadata.Get(ctx, strings.Title(key))
+	//		return str, nil
+	//	})
+	//	if err != nil {
+	//		return err
+	//	}
+	//	span.SetComponent(componentIDGOHttpClient)
+	//	span.SetSpanLayer(agentv3.SpanLayer_Http)
+	//	defer span.End()
 
-	name := fmt.Sprintf("%s.%s", req.Service(), req.Endpoint())
-	span1, err := sw.CreateExitSpan(ctx, name, req.Service(), func(key, value string) error {
+	//name := fmt.Sprintf("%s.%s", req.Service(), req.Endpoint())
+	span, err := sw.CreateExitSpan(ctx, path, req.Service(), func(key, value string) error {
 		mda, _ := metadata.FromContext(ctx)
 		md := metadata.Copy(mda)
 		md[key] = value
@@ -279,12 +289,18 @@ func NewGateCall(sw *go2sky.Tracer, ctx context.Context, req client.Request) err
 		return err
 	}
 
-	span1.SetComponent(componentIDGoMicroClient)
-	span1.SetSpanLayer(agentv3.SpanLayer_RPCFramework)
+	span.SetComponent(componentIDGOHttpClient)
+	//span1.SetComponent(componentIDGoMicroClient)
+	span.SetSpanLayer(agentv3.SpanLayer_Http)
 	utils.SetTContext(ctx)
 
-	defer span1.End()
+	defer span.End()
+	//记录request 数据
 
+	msg, _ := jsoniter.Marshal(req.Body())
+	span.Tag("请求内容", string(msg))
+	span.Tag("请求类型", req.ContentType())
+	span.Tag("请求方法", "post")
 	return err
 
 }
@@ -306,6 +322,9 @@ func NewCall(sw *go2sky.Tracer, ctx context.Context, req client.Request) error {
 	span.SetSpanLayer(agentv3.SpanLayer_RPCFramework)
 
 	defer span.End()
+	msg, _ := jsoniter.Marshal(req.Body())
+	span.Tag("请求内容", string(msg))
+	span.Tag("请求类型", req.ContentType())
 
 	return err
 }

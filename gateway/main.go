@@ -31,7 +31,8 @@ func main() {
 
 	router := fh_router.New()
 	InitRouter(router, reg) //注册路由器
-	fasthttp.ListenAndServe("0.0.0.0:8899", router.Handler)
+	default_http := conf.Get("api", "host").String("") + ":" + conf.Get("api", "port").String("8899")
+	fasthttp.ListenAndServe(default_http, router.Handler)
 }
 
 //分发路由器
@@ -95,7 +96,7 @@ func fasthttpdeal(ctx *fasthttp.RequestCtx) {
 
 	request := cl.NewRequest(path_slice[0], string(a)+"Service."+path_slice[1], req, client.WithContentType("application/json"))
 	//注入链路context
-	plugin_micro.NewGateCall(utils.GetTracer(), context_bg, request)
+	plugin_micro.NewGateCall(utils.GetTracer(), context_bg, request, path)
 	nctx := utils.GetContext()
 
 	if err := cl.Call(nctx, request, &rsp); err == nil {
