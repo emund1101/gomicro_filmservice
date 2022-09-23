@@ -61,7 +61,9 @@
     解压后, ln bin/protoc /usr/local
     
     @go get -u google.golang.org/protobuf/proto
-    @go install github.com/golang/protobuf/protoc-gen-go@latest
+    @go install github.com/asim/go-micro/cmd/protoc-gen-micro/v4@latest  安装ptotoc,micro的插件
+    @go install github.com/golang/protobuf/protoc-gen-go@latest          安装protoc,go的插件
+
     
     编写proto文件，
     编译文件
